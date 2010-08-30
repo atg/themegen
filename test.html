@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <title>L*Ch Color Wheel</title>
+        
+        <script src="color.js"></script>
+        <script src="ciecam.js"></script>
+                
+    </head>
+    <body>
+        
+        <canvas id="canvas" width="500" height="500">Lemme guess. IE user?</canvas>
+        
+        <script>
+        
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        
+        var size = 500;
+        var radius = size / 2;
+        
+        //Set up the background color
+        var vc = new CIECAM02_ViewingConditions();
+        vc.setBackground(0.2);
+        vc.setAverage();
+        vc.compute();
+        
+        /*
+        xyz_to_rgb = function() {
+          var _b, _c, _d, _e, _f, blue, green, m, red, x, y, z;
+          _b = this.asXYZ();
+          x = _b[0];
+          y = _b[1];
+          z = _b[2];
+          m = [[3.2406, -1.5372, -0.4986], [-0.9689, 1.8758, 0.0415], [0.0557, -0.2040, 1.0570]];
+          _c = matrixMultiply(m, [[x], [y], [z]]);
+          _d = _c[0];
+          red = _d[0];
+          _e = _c[1];
+          green = _e[0];
+          _f = _c[2];
+          blue = _f[0];
+          return [red, green, blue];
+        };
+        */
+        
+        for (x = 0; x < size; x += 1)
+        {
+            for (y = 0; y < size; y += 1)
+            {
+                //For every point in the canvas, find out if it's on the circle
+                var isOnCircle = pow(x - radius, 2) + pow(y - radius, 2) < pow(radius, 2);
+                
+                //if (isOnCircle && pow(radius, 2) - 20 < pow(x - radius, 2) + pow(y - radius, 2))
+                  //  isOnCircle = false;
+                
+                //If it's NOT, continue
+                if (!isOnCircle)
+                    continue;
+                
+                //Translate and scale to get our equivalent point on the unit
+                var x_hat = (x - radius) / radius;
+                var y_hat = (y - radius) / radius;
+                
+                //Turn into polar coords
+                var angle = atan2(y_hat, x_hat);
+                var mag = sqrt(pow(x_hat, 2) + pow(y_hat, 2));
+                
+                //Draw!                
+                //var c = new LABColor(angle, mag, 0.80);
+                //var c = new RGBColor(angle + Math.PI, 0.3, 0.95);
+                
+                
+                //Set up the color itself
+                var cc = new CIECAM02_Color();
+                cc.ciecam_to_xyz(0.5, mag, angle * 360 / Math.PI);
+                
+                
+                
+                //if (angle == 0)
+                  //  ctx.fillStyle = "rgb(0, 0, 0)"
+                //else
+                ctx.fillStyle = "rgb(" + floor(cc.r * 255) + ", " + floor(cc.g * 255) + ", " + floor(cc.b * 255) + ")";
+                ctx.fillRect(x, y, 1, 1);
+                
+                //document.write("<" + angle + "")
+            }
+        }
+        
+        </script>
+        
+    </body>
+</html>

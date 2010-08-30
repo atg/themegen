@@ -1,0 +1,42 @@
+items {a, b, c}
+bins {X, Y}
+
+
+X: {a, b}
+Y: {c}
+
+X: {a, c}
+Y: {b}
+
+X: {b, c}
+Y: {a}
+
+X: {c}
+Y: {a, b}
+
+X: {b}
+Y: {a, c}
+
+X: {b, c}
+Y: {a}
+
+
+
+
+
+
+I have m items and n bins. Assuming that bins cannot be empty, how many ways are there of arranging the items in the bins?
+
+
+Each set can have all k-subsets where 0 < k < m. Additionally, if 1 < k < m - 1 then there are further possibilities. Consider
+
+X: {a, b}
+Y: {c}
+Z: {d}
+
+and
+
+X: {a, b}
+Y: {d}
+Z: {c}
+
