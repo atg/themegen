@@ -30,18 +30,19 @@ generateTheme = (options) ->
     theme = { "options": options }
     
     # Generate hue clusters
-    theme["hue_clusters"] = generateHueClusters(theme)
+    theme = generateHueClusters(theme)
     
     # Generate a background color
-    theme["background"] = generateBackgroundColor(theme)
+    theme = generateBackgroundColor(theme)
     
     # Cluster zones
-    theme["zone_clusters"] = generateZoneClusters(theme['options']['hue_cluster_count'], theme["options"]["zones"])
+    zones = options["zones"]
+    theme["zone_clusters"] = generateZoneClusters(theme['options']['hue_cluster_count'], zones)
     
     comparator = (a, b) ->
         # Sort a and b DESCENDING by centroids
-        c1 = centroid(a["values"])
-        c2 = centroid(b["values"])
+        c1 = centroid(a)["values"]["importance"]
+        c2 = centroid(b)["values"]["importance"]
         
         if c1 > c2
             return -1
@@ -52,13 +53,17 @@ generateTheme = (options) ->
     
     theme["zone_clusters"] = theme["zone_clusters"].sort(comparator)
     
+    
+    # Generate colors for each zone cluster
+    theme["new_zones"] = generateCIECAMColors(theme)
+    
     # Scale lightness and colorfulness
     applyPostProcessing(theme)
     
-    # Generate colors for each zone cluster
-    generateColors(theme)
+    # Convert colors to RGB
+    generateRGBColors(theme)
     
-    return theme["new_zones"]
+    return theme
         
 generateHueClusters = (theme) ->
     options = theme['options']
@@ -118,87 +123,155 @@ generateHueClusters = (theme) ->
         if clusterIsInvalid == false
             hue_clusters.push(center)
     
-    return hue_clusters
+    theme["hue_clusters"] = hue_clusters
+    
+    return theme
 
 
 generateBackgroundColor = (theme) ->    
-    discrete_lightness = theme["background_lightness"] # "Dark", "Light", "Either"
+    discrete_lightness = theme["options"]["background_lightness"] # "Dark", "Light", "Either"
     
+    # Lightness Mode
     isDark = false
     if discrete_lightness == "Dark"
         isDark = true
+    else if discrete_lightness == "Light"
+        isDark = false
     else if discrete_lightness == "Either"
-        isDark = randomInInteval(0.0, 1.0) > 0.5
+        isDark = random() > 0.5
     
     theme["is_dark"] = isDark
     
+    
+    
     # Compute the lightness
     lightness = 1.0
-    maximumLightnessDifferenceFromEndpoint = 0.1
-    discrete_chroma = theme["background_type"] # "Black & White", "Grayscale", "Neutral"
+    discrete_chroma = theme["options"]["background_type"] # "Black & White", "Grayscale", "Neutral"
     
-    if discrete_chroma == "Black/white"
-        lightness = if isDark then 0.0 else 1.0
-    else
-        lightness = randomInInterval(0.0, maximumLightnessDifferenceFromEndpoint)
+    if discrete_chroma == "Black & White"
+        if isDark
+            lightness = bw_black
+        else
+            lightness = bw_white
+    else if discrete_chroma == "Grayscale"
+        if isDark
+            lightness = randomInInterval(gray_dark_min, gray_dark_max)
+        else
+            lightness = randomInInterval(gray_light_min, gray_light_max)
+    else if discrete_chroma == "Neutral"
+        if isDark
+            lightness = randomInInterval(neutral_dark_min, neutral_dark_max)
+        else
+            lightness = randomInInterval(neutral_light_min, neutral_light_max)
+    
         
-        if !isDark
-            lightness = 1.0 - lightness
+    # If this is not neutral mode - then we're done!
+    if discrete_chroma != "Neutral"
+        c = new RGBColor(0.0, 0.0, lightness)
+        
+        rgb = c.asRGB()
+        rgb = [rgb[0] * 255, rgb[1] * 255, rgb[2] * 255]
+        
+        theme["background"] = [0.0, 0.0, lightness]
+        theme["rgb_background"] = rgb
+        
+        return theme 
     
-    hue = 0.0
-    chroma = 0.0
-    
-    if discrete_chroma == "Neutral"
+    # Otherwise, we need to find a hue and chroma
+    else    
+        hue = 0.0
+        chroma = 0.0
+        
         # Compute the hue
         primary_cluster = theme["hue_clusters"][0]
         hue = randomHueInCluster(primary_cluster, theme["options"]["hue_cluster_width"])
-        
+                
         # Compute the chroma
-        if (isDark)
-            chroma = 0.5
+        if isDark
+            chroma = randomInInterval(neutral_dark_chroma_min, neutral_dark_chroma_max)
         else
-            chroma = 0.75
+            chroma = randomInInterval(neutral_light_chroma_min, neutral_light_chroma_max)
+        
+        
+        # Generate an rgb triple from the JCh using CIECAM
+        plain_vc = new CIECAMColor.normalVC() #vcWithBackground(95.05, 100, 108.88)
+        c = new CIECAMColor(hue, chroma, lightness)
+        rgb = c.asRGB(plain_vc)
+        
+        #alert(rgb)
+        
+        # Take the rgb triple and convert it into HSL
+        #c2 = RGBColor.fromRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255)
+        
+        #alert([c2.hue, c2.chroma, c2.lightness])
+        
+        # Set the chroma and lightness to our new values
+        #c2.chroma = chroma
+        #c2.lightness = lightness
     
-    plain_vc = CIECAMColor.vcWithBackground(95.05, 100, 108.88)
-    c = CIECAMColor(theme["background"][0], theme["background"][1], theme["background"][2])
-    theme["rgb_background"] = c.asRGB(plain_vc)
-    
-    return [hue, chroma, lightness]
+        # Convert the HSL back into an rgb triple
+        #rgb = c2.asRGB()
+        #rgb = [rgb[0] * 255, rgb[1] * 255, rgb[2] * 255]
+        
+        #alert(rgb)
+        
+        
+        theme["background"] = [hue, chroma, lightness]
+        theme["rgb_background"] = rgb
+        
+        return theme
 
 randomHueInCluster = (primary_cluster, width) ->
-    return modnormalRandomInInterval(primary_cluster - width / 2, primary_cluster + width / 2, primary_cluster)
+    a = primary_cluster - width / 2
+    b = primary_cluster + width / 2
+    
+    r = normalRandom()
+    r *= b - a
+    r += a
+    
+    if r < 0
+        while r < 0
+            r += 360
+    else if r > 360
+        while r > 360
+            r -= 360
+    
+    return r
+    #return modnormalRandomInInterval(, , primary_cluster)
 
 
 generateZoneClusters = (k, zones) ->
     for zone in zones
         zone["values"] = 
-            "importance": exp(0.5 * zone["importance"])
+            "importance": zone["importance"]
             "likeness": zone["likeness"]
     
-    return kmeans(k, zone, euclideanMetric)
+    return kmeans(k, zones, euclideanMetric)
 
 
 generateCIECAMColors = (theme) ->
     new_zones = []
-    for i in [i...theme["zone_clusters"].length]
+    for i in [0...theme["zone_clusters"].length]
         hue_cluster = theme["hue_clusters"][i]
         for zone in theme["zone_clusters"][i]
             zone["color"] = generateColorForZone(theme, zone, hue_cluster)
+            new_zones.push(zone)
+    return new_zones
     
 generateColorForZone = (theme, zone, hue_cluster) ->
     isDark = theme["is_dark"]
-    hue = randomHueInCluster(primary_cluster, theme["options"]["hue_cluster_width"])
+    hue = randomHueInCluster(hue_cluster, theme["options"]["hue_cluster_width"])
         
     chroma = 0
     if (isDark)
-        chroma = randomInInterval(0.3, 0.5)
+        chroma = randomInInterval(color_dark_chroma_min, color_dark_chroma_max)
     else
-        chroma = randomInInterval(0.2, 0.3)
+        chroma = randomInInterval(color_light_chroma_min, color_light_chroma_max)
         
     if (isDark)
-        lightness = randomInInterval(1.35, 1.60)
+        lightness = randomInInterval(color_dark_lightness_min, color_dark_lightness_max)
     else
-        lightness = randomInInterval(0.6, 0.7)
+        lightness = randomInInterval(color_light_lightness_min, color_light_lightness_max)
     
     return [hue, chroma, lightness]
 
@@ -206,28 +279,33 @@ generateColorForZone = (theme, zone, hue_cluster) ->
 # Apply a contrast `k` in [-1, 1] to the luminance `x` with mean luminance `mu`
 contrast_function = (k, x, mu) ->    
     ###
-    Identities
-        f(1, x) = mu
-        f(0, x) = c
-        f(-1, x) = {1, 0}
+    Identities for f(k, x)
+        f(-1, x) = mu
+        f(0, x) = x
+        f(1, x) = {1, 0}
     ###
     
-    if x == mu || k == 0
+    if k == 0
         return x
     
-    if x < mu
-        if k > 0
-            return scale(x, mu - x, k)
+    if k < 0
+        if x < mu
+            return scale(x, mu, -k)
         else
+            return scale(mu, x, k - 1)
+    else
+        if x < mu
             return scale(0, x, 1 - k)
-    if x > mu
-        if k > 0
-            return scale(mu, x - mu, k)
         else
-            return scale(x, 1, 1 - k)
-
-
+            return scale(x, 1, k)
+    
 saturation_function = (k, x) ->
+    ###
+        f(0, x) = x
+        f(-1, x) = 0
+        f(1, x) = 1
+    ###
+    
     if k == 0
         return x
     
@@ -238,90 +316,48 @@ saturation_function = (k, x) ->
 
 
 applyPostProcessing = (theme) ->
+    
     # Find the average lightness
     average_lightness = 0
     count = 0
-    for cluster in theme["zone_clusters"]
-        for zone in cluster
-            average_lightness += zone["color"][2]
-            count += 1
+    for zone in theme["new_zones"]
+        average_lightness += zone["color"][2]
+        count += 1
     
     average_lightness /= count
     
     
     # Scale lightness (contrast)
     
-    contrast = theme["contrast"]
-    for cluster in theme["zone_clusters"]
-        for zone in cluster
-            zone["color"][1] = contrast_function(contrast, zone["color"][1], average_lightness)
+    contrast = theme["options"]["contrast"]
+    for zone in theme["new_zones"]
+        zone["color"][2] = contrast_function(contrast, zone["color"][2], average_lightness)
     
     
     # Find the average chroma
-    ###
-    average_colorfulness
-    for cluster in theme["zone_clusters"]
-        for zone in cluster
-            average_colorfulness += zone["color"][1]
-    
-    average_colorfulness /= count
-    ###
     
     # Scale chroma (colorfulness)
-    colorfulness = theme["colorfulness"]
-    for cluster in theme["zone_clusters"]
-        for zone in cluster
-            zone["color"][1] = saturation_function(colorfulness, zone["color"][1])
+    colorfulness = theme["options"]["colorfulness"]
+    for zone in theme["new_zones"]
+        zone["color"][1] = saturation_function(colorfulness, zone["color"][1])
     
-
+    
 generateRGBColors = (theme) ->
     rgb_background = theme["rgb_background"]
-    background_vc = CIECAMColor.vcWithBackground(rgb_background[0], rgb_background[1], rgb_background[2])
+    background_vc = new CIECAMColor.normalVC()#vcWithBackground(rgb_background[0] * 255, rgb_background[1] * 255, rgb_background[2] * 255)
     
-    new_zones = []
-    for cluster in theme["zone_clusters"]
-        for zone in theme["zone_clusters"][i]            
-            c = CIECAMColor(zone["color"][0], zone["color"][1], zone["color"][2])
-            zone["rgb"] = c.asRGB(background_vc)
-            
-            new_zones.push(zone)
-    
-    theme["new_zones"] = new_zones
-
-### COLOR STUFF ###
-
-# TODO: Check this line, I'm not sure it's correct
-[refX, refY, refZ] = [1, 1, 1]
-
-#hueInterpolationPoints = [0, 40/360, 60/360, 110/360, 179/360, 197/360, 276/360, 300/360, 1]
-#hueInterpolationPoints = [0, 10/360, 20/360, 10/360, 40/360, 50/360, 60/360, 300/360, 1]
-
-###
-    Red: 336 to 11
-    Orange: 11 to 47
-    Yellow: 47 to 67
-    Green: 67 to 143
-    Green-Blue: 143 to 179
-    Blue: 179 to 260
-    Purple: 260 to 289
-    Pink: 289 to 336
-###
-#336/360,
-hueInterpolationPoints = [336/360, 11/360, 47/360, 67/360, 143/360, 179/360, 260/360, 289/360, 336/360]
-#hueInterpolationPoints = [0, 0.1, 0.2, 0.3, 1.0]
-
-
-###
-a = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-b = [[1, 3], [5, 7], [9, 11]]
-console.log(matrixMultiply(a, b))
-###
-
-###
-c = new LABColor.fromLRGB(0.7, 0.0, 0.0)
-console.log(" hCL #{c.hue}, #{c.chroma}, #{c.lightness}")
-[l, a, b] = c.asLAB()
-console.log(" lab #{l}, #{a}, #{b}")
-[r, g, b] = c.asLRGB()
-console.log("srgb #{r}, #{g}, #{b}")
-###
+    for zone in theme["new_zones"]
+        if zone["name"] == "normal"
+            if theme["is_dark"]
+                zone["rgb"] = [255, 255, 255]
+            else
+                zone["rgb"] = [0, 0, 0]
+        else
+            if theme["is_dark"]
+                c = new CIECAMColor(zone["color"][0], zone["color"][1], zone["color"][2])
+                zone["rgb"] = c.asRGB(background_vc)
+            else
+                c = new LABColor(zone["color"][0] * 2 * pi / 360, zone["color"][1], zone["color"][2])
+                zone["rgb"] = c.asLRGB()
+        #alert(zone["rgb"])
+        

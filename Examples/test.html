@@ -1,6 +1,8 @@
 <html>
     <head>
         <title>L*Ch Color Wheel</title>
+
+        <script src="../Constants.js"></script>
         
         <script src="../Built/Color/CIECAM02.js"></script>
         <script src="../Built/Color/CIEDE2000.js"></script>
@@ -67,22 +69,89 @@
         }
         
         
+        function applyTheme(theme) {
+            //Apply the background
+            var backgroundRGBString = rgb_to_css(theme["rgb_background"]);
+            document.getElementsByTagName("html")[0].style.backgroundColor = backgroundRGBString;
+            
+            //alert(theme["background"]);
+            
+            //Apply the zones
+            for (var i = 0; i < theme["new_zones"].length; i++)
+            {
+                var zone = theme["new_zones"][i];
+                var zoneChildren = getElementsByClass(zone["name"], null, null);
+                var rgbString = rgb_to_css(zone["rgb"]);
+                //alert(rgbString);
+                
+                for (var j = 0; j < zoneChildren.length; j++)
+                {
+                    zoneChildren[j].style.color = rgbString;
+                }
+            }
+        }
+        
+        
+        function makeZones(zoneNames) {
+            var newZones = [];
+            for (var i = 0; i < zoneNames.length; i++)
+            {
+                newZones.push({
+                    'name':zoneNames[i],
+                    'importance': i / (zoneNames.length - 1),
+                    'likeness': 0.5
+                });
+            }
+            return newZones;
+        }
+        
+        
+        var zones = makeZones(["comment", "function","numeric", "string", "variable", "preprocessor", "normal", "keyword"]);
+        
+        /*
+        var zones = [{
+                'name':'comment',
+                'importance':0.3,
+                'likeness':0.5
+            },
+            {
+                'name':'string',
+                'importance':0.6,
+                'likeness':0.3
+            },
+            {
+                'name':'variable',
+                'importance':0.8,
+                'likeness':0.2
+            },
+            {
+                'name':'number',
+                'importance':0.61,
+                'likeness':0.35
+            }
+        ];
+        */
         var theme = {
-                'options':{
-                    'background_lightness': "Either",
-                    'background_type': "Neutral",
+//                'options':{
+                    'background_lightness': "Light",
+                    'background_type': "Grayscale",
                     
                     'contrast': 0.0,
                     'colorfulness': 0.0,
                     
-                    'hue_cluster_count': 3,
-                    'hue_cluster_spacing': 100,
-                    'hue_cluster_width': 45
-                }
+                    'hue_cluster_count': 4,
+                    'hue_cluster_spacing': 80,
+                    'hue_cluster_width': 40,
+                    
+                    'zones': zones
+ //               }
             };
-       var clusters = generateHueClusters(theme);
+       // alert(theme["options"]["zones"])
+       theme = generateTheme(theme);
         
-        alert("clusters are " + clusters); //theme['options']['hue_cluster_width']);
+        //alert("clusters are " + clusters); //theme['options']['hue_cluster_width']);
+        
+        applyTheme(theme);
         
         /*
         function generateHueClusters(N) {

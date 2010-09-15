@@ -1,4 +1,4 @@
-var abs, atan2, cos, euclideanMetric, exp, floor, fmod, matrixMultiply, pi, pow, round, scale, sin, sqrt, sum, tan;
+var abs, atan2, cos, euclideanMetric, exp, floor, fmod, log, matrixMultiply, maximum, minimum, pi, pow, round, scale, sin, sqrt, sum, tan;
 /* CONSTANTS and FUNCTIONS */
 pow = Math.pow;
 exp = Math.exp;
@@ -10,6 +10,7 @@ tan = Math.tan;
 atan2 = Math.atan2;
 floor = Math.floor;
 round = Math.round;
+log = Math.log;
 pi = Math.PI;
 fmod = function(x, n) {
   return x % n;
@@ -29,11 +30,35 @@ scale = function(a, b, k) {
 };
 euclideanMetric = function(a, b) {
   var x1, x2, y1, y2;
-  x1 = a.values[0];
-  x2 = b.values[0];
-  y1 = a.values[1];
-  y2 = b.values[1];
+  x1 = a.values["likeness"];
+  x2 = b.values["importance"];
+  y1 = a.values["likeness"];
+  y2 = b.values["importance"];
   return sqrt(x1 * x2 + y1 * y2);
+};
+maximum = function(xs) {
+  var _a, _b, _c, maxV, x;
+  maxV = null;
+  _b = xs;
+  for (_a = 0, _c = _b.length; _a < _c; _a++) {
+    x = _b[_a];
+    if (maxV === null || x > maxV) {
+      maxV = x;
+    }
+  }
+  return maxV;
+};
+minimum = function(xs) {
+  var _a, _b, _c, minV, x;
+  minV = null;
+  _b = xs;
+  for (_a = 0, _c = _b.length; _a < _c; _a++) {
+    x = _b[_a];
+    if (minV === null || x < minV) {
+      minV = x;
+    }
+  }
+  return minV;
 };
 matrixMultiply = function(a, b) {
   var _a, _b, c, i, j, k, m, n, p;

@@ -21,16 +21,17 @@ kmeans = (k, points, metric) ->
 # Find initial means
 find_initial_means = (k, points, metric) ->
     # We just choose arbitrary means here, but it would be better to chose them agglomeratively
-    l = floor((points.length + k - 1) / k)
+    l = floor(points.length / k)
     
     position = 0
     means = []
     for i in [0...k]
         if i == k - 1
-            means[i] = points.slice(position)
+            means[i] = centroid(points.slice(position))
         else
-            means[i] = points.slice(position, position + l - 1)
+            means[i] = centroid(points.slice(position, position + l))
             position += l
+        
     return means
 
 # Update means
@@ -48,16 +49,16 @@ update_means = (k, groupings) ->
 ## find_observations :: Int -> [Point] -> [Centroid] -> Metric -> [[Point]]
 find_groupings = (k, points, means, metric) ->
     groupings = []
-
+    
+    for i in [0...k]
+        groupings.push([])
+    
     # For each point
     for p in points
         # Find the closest mean
         closest_mean_index = closest(means, p, metric)
-
+        
         # Add this point to the array for that point
-        if ! groupings[closest_mean_index]?
-            groupings[closest_mean_index] = []
-
         groupings[closest_mean_index].push(p)
 
     return groupings
@@ -76,20 +77,24 @@ max_difference = (a, b, metric) ->
     return max
 
 # Find the centroid (average point) of a list of `points`
-centroid = (points) ->
-    n = points.length
+centroid = (points) ->    
     centroid_point =
-        "values": 0 for i in [0...n]
+        "values":
+            "likeness": 0
+            "importance": 0
     
     for p in points.sort()
-        for i in [0...p.values.length]
-            centroid_point.values[i] += p.values[i] / points.length
+        centroid_point.values["likeness"] += p.values["likeness"] / points.length
+        centroid_point.values["importance"] += p.values["importance"] / points.length
     
     return centroid_point
 
 
 # Find the index of the closest point in a list of `points` to `point`, by using `metric`
 closest = (points, point, metric) ->
+    if points.length == 0
+        return -1
+    
     minimum = -1
     smallest_distance = -1
     

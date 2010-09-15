@@ -160,7 +160,7 @@ CIECAM02_Color.prototype.ciecam_to_xyz = function(J, C, h, viewing_conditions) {
 CIECAM02_ViewingConditions = function() {};
 CIECAM02_ViewingConditions.prototype.setBackground = function(field_luminance) {
   var _a;
-  _a = [4, brightness * 100, 95.05, 100, 108.88];
+  _a = [4, field_luminance * 100, 95.05, 100, 108.88];
   this.la = _a[0];
   this.yb = _a[1];
   this.xw = _a[2];

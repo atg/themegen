@@ -16,7 +16,6 @@ normalRandom = ->
 
 normalRandomInInterval = (a, b) -> a + normalRandom() * (b - a)
 
-
 # Generate a random number between a and b with a good probability of being in the neighbourhood of center
 modnormalRandomInInterval = (a, b, center) -> 
     # Generate a random number between 0 and 1 with center 0.5

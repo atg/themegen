@@ -16,14 +16,14 @@ kmeans = function(k, points, metric) {
 };
 find_initial_means = function(k, points, metric) {
   var i, l, means, position;
-  l = floor((points.length + k - 1) / k);
+  l = floor(points.length / k);
   position = 0;
   means = [];
   for (i = 0; (0 <= k ? i < k : i > k); (0 <= k ? i += 1 : i -= 1)) {
     if (i === k - 1) {
-      means[i] = points.slice(position);
+      means[i] = centroid(points.slice(position));
     } else {
-      means[i] = points.slice(position, position + l - 1);
+      means[i] = centroid(points.slice(position, position + l));
       position += l;
     }
   }
@@ -38,15 +38,15 @@ update_means = function(k, groupings) {
   return means;
 };
 find_groupings = function(k, points, means, metric) {
-  var _a, _b, _c, _d, closest_mean_index, groupings, p;
+  var _a, _b, _c, closest_mean_index, groupings, i, p;
   groupings = [];
+  for (i = 0; (0 <= k ? i < k : i > k); (0 <= k ? i += 1 : i -= 1)) {
+    groupings.push([]);
+  }
   _b = points;
   for (_a = 0, _c = _b.length; _a < _c; _a++) {
     p = _b[_a];
     closest_mean_index = closest(means, p, metric);
-    if (!(typeof (_d = groupings[closest_mean_index]) !== "undefined" && _d !== null)) {
-      groupings[closest_mean_index] = [];
-    }
     groupings[closest_mean_index].push(p);
   }
   return groupings;
@@ -64,29 +64,26 @@ max_difference = function(a, b, metric) {
   return max;
 };
 centroid = function(points) {
-  var _a, _b, _c, _d, _e, centroid_point, i, n, p;
-  n = points.length;
+  var _a, _b, _c, centroid_point, p;
   centroid_point = {
-    "values": (function() {
-      _a = [];
-      for (i = 0; (0 <= n ? i < n : i > n); (0 <= n ? i += 1 : i -= 1)) {
-        _a.push(0);
-      }
-      return _a;
-    })()
-  };
-  _c = points.sort();
-  for (_b = 0, _d = _c.length; _b < _d; _b++) {
-    p = _c[_b];
-    _e = p.values.length;
-    for (i = 0; (0 <= _e ? i < _e : i > _e); (0 <= _e ? i += 1 : i -= 1)) {
-      centroid_point.values[i] += p.values[i] / points.length;
+    "values": {
+      "likeness": 0,
+      "importance": 0
     }
+  };
+  _b = points.sort();
+  for (_a = 0, _c = _b.length; _a < _c; _a++) {
+    p = _b[_a];
+    centroid_point.values["likeness"] += p.values["likeness"] / points.length;
+    centroid_point.values["importance"] += p.values["importance"] / points.length;
   }
   return centroid_point;
 };
 closest = function(points, point, metric) {
   var _a, d, i, minimum, p, smallest_distance;
+  if (points.length === 0) {
+    return -1;
+  }
   minimum = -1;
   smallest_distance = -1;
   _a = points.length;
