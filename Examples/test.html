@@ -1,0 +1,229 @@
+<html>
+    <head>
+        <title>L*Ch Color Wheel</title>
+        
+        <script src="../Built/Color/CIECAM02.js"></script>
+        <script src="../Built/Color/CIEDE2000.js"></script>
+        <script src="../Built/Color/color.js"></script>
+        <script src="../Built/Math/kmeans.js"></script>
+        <script src="../Built/Math/math.js"></script>
+        <script src="../Built/Math/stats.js"></script>
+        <script src="../Built/UI/generator.js"></script>
+        
+        <style type="text/css" media="screen">
+            * {
+                font-family: "menlo";
+                font-size: 11px;
+               
+            }
+            #text {
+                 padding: 14px;
+            }
+            
+            .normal {
+                color: white;
+            }
+            .comment {
+                font-style: italic;
+            }
+            .keyword, .preprocessor {
+                font-weight: bold;
+            }
+            
+        </style>   
+    </head>
+    <body>
+        
+        <div id="text">
+            <span class="preprocessor">#import </span><span class="string">&lt;stdio.h&gt;</span><br><br>
+            
+            <span class="comment">//Answers questions such as "What is 6 * 7?" or "What is 34 + 8?"<br></span>
+            <span class="keyword">int</span>
+            <span class="function">main</span><span class="normal">(</span><span class="keyword">void</span><span class="normal">)<br>{<br></span>
+                
+            
+            
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span> <span class="variable">num</span> <span class="normal">=</span> <span class="numeric">42</span><span class="normal">;</span><br>
+            
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="function">printf</span><span class="normal">(</span><span class="string">"The answer is %d"</span><span class="normal">, </span> <span class="variable">num</span><span class="normal">)</span><span class="normal">;</span><br>
+            
+            <span class="normal">}</span>
+            
+            
+        </div>
+        
+        <canvas id="canvas" width="500" height="500">Lemme guess. IE user?</canvas>
+        
+        <script>
+        
+        function getElementsByClass(classname, node)  {
+            if(!node) node = document.getElementsByTagName("body")[0];
+            var a = [];
+            var re = new RegExp('\\b' + classname + '\\b');
+            var els = node.getElementsByTagName("*");
+            for(var i=0,j=els.length; i<j; i++)
+                if(re.test(els[i].className))a.push(els[i]);
+            return a;
+        }
+        
+        
+        var clusters = generateHueClusters({
+            'hue_cluster_count': 3,
+            'hue_cluster_spacing': 100,
+            'hue_cluster_width': 45
+        });
+        
+        /*
+        function generateHueClusters(N) {
+            //Generate hue_count number of spots
+            var hue_clusters = [];
+
+            //There may a maximum of 5 clusters
+            var hue_count = N;
+            
+            while (true) {
+                //If there's already enough clusters, stop
+                if (hue_clusters.length >= hue_count)
+                    break;
+
+                //Generate a new cluster center
+                var center = randomBetween(0, 1);
+
+                //Make sure the cluster is far enough from everything else
+                var foundOtherCloseCenter = false;
+                for (var i = 0; i < hue_clusters.length; i++) {
+                    if (!(center < hue_clusters[i] - hue_cluster_radius
+                           && center > hue_clusters[i] + hue_cluster_radius))
+                        foundOtherCloseCenter = true;
+                }
+
+                //If the cluster is sufficiently far away, continue
+                if (foundOtherCloseCenter === false)
+                    hue_clusters.push(center);
+            }
+
+            return hue_clusters;
+        }
+        
+        function generateRandomBetween(a, b) {
+            return a + Math.random() * (b - a);
+        }
+        
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        
+        var size = 500;
+        var radius = size / 2;
+        
+        //Set up the background color
+        var bg = 0.2;
+        //var bg = 1.0;
+        
+        var vc = new CIECAM02_ViewingConditions();
+        vc.setBackground(0.2);
+        vc.setAverage();
+        vc.compute();
+        
+        ctx.fillStyle = "rgb(" + floor(bg * 255) + ", " + floor(bg * 255) + ", " + floor(bg * 255) + ")";
+        ctx.fillRect(0, 0, size, size);
+        
+        document.getElementsByTagName("html")[0].style.backgroundColor = "rgb(" + floor(bg * 255) + ", " + floor(bg * 255) + ", " + floor(bg * 255) + ")";
+        
+        var children = ["preprocessor", "keyword", "function", "string", "variable", "numeric", "comment"];
+        for (i = 0; i < children.length; i++)
+        {
+            var zoneChildren = getElementsByClass(children[i], null, null);
+            
+            
+            var J = 160;
+            var C = 40;
+            
+            J = generateRandomBetween(135, 160);
+            C = generateRandomBetween(30, 50);
+            
+            //var J = 120;
+            //var C = 80;
+            
+            var h = Math.random() * 360;
+            
+            var cc = new CIECAM02_Color();
+            cc.ciecam_to_xyz(J, C, h, vc);
+            
+            for (j = 0; j < zoneChildren.length; j++)
+            {
+                zoneChildren[j].style.color = "rgb(" + floor(cc.r) + ", " + floor(cc.g) + ", " + floor(cc.b) + ")";
+                
+            }
+        }
+        
+        
+        /*
+        xyz_to_rgb = function() {
+          var _b, _c, _d, _e, _f, blue, green, m, red, x, y, z;
+          _b = this.asXYZ();
+          x = _b[0];
+          y = _b[1];
+          z = _b[2];
+          m = [[3.2406, -1.5372, -0.4986], [-0.9689, 1.8758, 0.0415], [0.0557, -0.2040, 1.0570]];
+          _c = matrixMultiply(m, [[x], [y], [z]]);
+          _d = _c[0];
+          red = _d[0];
+          _e = _c[1];
+          green = _e[0];
+          _f = _c[2];
+          blue = _f[0];
+          return [red, green, blue];
+        };
+        */
+        /*
+        for (x = 0; x < size; x += 1)
+        {
+            for (y = 0; y < size; y += 1)
+            {
+                //For every point in the canvas, find out if it's on the circle
+                var isOnCircle = pow(x - radius, 2) + pow(y - radius, 2) < pow(radius, 2);
+                
+                //if (isOnCircle && pow(radius, 2) - 20 < pow(x - radius, 2) + pow(y - radius, 2))
+                  //  isOnCircle = false;
+                
+                //If it's NOT, continue
+                if (!isOnCircle)
+                    continue;
+                
+                //Translate and scale to get our equivalent point on the unit
+                var x_hat = (x - radius) / radius;
+                var y_hat = (y - radius) / radius;
+                
+                //Turn into polar coords
+                var angle = atan2(y_hat, x_hat);
+                var mag = sqrt(pow(x_hat, 2) + pow(y_hat, 2));
+                
+                //Draw!                
+                //var c = new LABColor(angle, mag, 0.80);
+                //var c = new RGBColor(angle + Math.PI, 0.3, 0.95);
+                
+                
+                //Set up the color itself
+                var cc = new CIECAM02_Color();
+                angle += pi;
+                angle *= 180 / pi;
+                
+                cc.ciecam_to_xyz(160, 40, angle, vc);
+                
+                //document.write("" + cc.r + "<br>");
+                
+                
+                //if (angle == 0)
+                  //  ctx.fillStyle = "rgb(0, 0, 0)"
+                //else
+                ctx.fillStyle = "rgb(" + floor(cc.r) + ", " + floor(cc.g) + ", " + floor(cc.b) + ")";
+                ctx.fillRect(x, y, 1, 1);
+                
+                //document.write("<" + angle + "")
+            }
+        }*/
+        
+        </script>
+        
+    </body>
+</html>

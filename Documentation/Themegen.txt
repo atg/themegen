@@ -1,0 +1,6 @@
+1. Pick background color
+2. Pick N points on the circle at random that are sufficiently apart (by at least δ). These will be the centers of our hue clusters.
+3. Score each syntax zone by Likeness and Importance
+4. Use k-means to cluster (likeness, importance) scores into N groups. These correspond to our N hue clusters generated earlier.
+5. For each syntax zone: pick a hue, then pick a chroma and lightness corresponding to the importance of the zone. Use CIECAM to control for the background color we chose earlier.
+6. Export
