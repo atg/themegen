@@ -67,11 +67,22 @@
         }
         
         
-        var clusters = generateHueClusters({
-            'hue_cluster_count': 3,
-            'hue_cluster_spacing': 100,
-            'hue_cluster_width': 45
-        });
+        var theme = {
+                'options':{
+                    'background_lightness': "Either",
+                    'background_type': "Neutral",
+                    
+                    'contrast': 0.0,
+                    'colorfulness': 0.0,
+                    
+                    'hue_cluster_count': 3,
+                    'hue_cluster_spacing': 100,
+                    'hue_cluster_width': 45
+                }
+            };
+       var clusters = generateHueClusters(theme);
+        
+        alert("clusters are " + clusters); //theme['options']['hue_cluster_width']);
         
         /*
         function generateHueClusters(N) {
@@ -104,6 +115,7 @@
 
             return hue_clusters;
         }
+        
         
         function generateRandomBetween(a, b) {
             return a + Math.random() * (b - a);

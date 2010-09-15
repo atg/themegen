@@ -22,7 +22,16 @@ sum = (a) ->
         s += x
     return s
 
-euclidianMetric = (x, y) -> sqrt(x.value * x.value + y.value * y.value)
+scale = (a, b, k) -> (1 - k) * a  +  k * b
+
+euclideanMetric = (a, b) ->
+    x1 = a.values[0]
+    x2 = b.values[0]
+    
+    y1 = a.values[1]
+    y2 = b.values[1]
+    
+    return sqrt(x1 * x2  +  y1 * y2)
 
 matrixMultiply = (a, b) ->
     # http://softwareengineering.vazexqi.com/2009/11/23/lessons-from-parallelizing-matrix-multiplication

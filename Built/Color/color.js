@@ -1,4 +1,26 @@
-var LABColor, RGBColor;
+var CIECAMColor, LABColor, RGBColor;
+CIECAMColor = function(_a, _b, _c) {
+  this.lightness = _c;
+  this.chroma = _b;
+  this.hue = _a;
+  return this;
+};
+CIECAMColor.vcWithBackground = function(r, g, b) {
+  var _a, vc;
+  vc = CIECAM02_ViewingConditions();
+  vc.setBackground(0.2);
+  vc.setAverage();
+  _a = cat02_to_xyz(r, g, b);
+  vc.xw = _a[0];
+  vc.yw = _a[1];
+  vc.zw = _a[2];
+  return [vc.xw, vc.yw, vc.zw];
+};
+CIECAMColor.prototype.asRGB = function(vc) {
+  var c;
+  c = CIECAM02_Color();
+  return ciecam_to_xyz(this.lightness * 100, this.chroma * 100, this.hue);
+};
 RGBColor = function(_a, _b, _c) {
   this.lightness = _c;
   this.chroma = _b;

@@ -1,3 +1,18 @@
+class CIECAMColor
+    constructor: (@hue, @chroma, @lightness) ->
+    
+    @vcWithBackground: (r, g, b) ->
+        vc = CIECAM02_ViewingConditions()
+        vc.setBackground(0.2)
+        vc.setAverage()
+        
+        [vc.xw, vc.yw, vc.zw] = cat02_to_xyz(r, g, b)
+    
+    asRGB: (vc) ->
+        c = CIECAM02_Color()
+        ciecam_to_xyz(@lightness * 100, @chroma * 100, @hue)
+
+
 class RGBColor
     constructor: (@hue, @chroma, @lightness) ->
     

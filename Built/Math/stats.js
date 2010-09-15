@@ -1,8 +1,18 @@
-var modnormalRandomInInterval, normalRandom, random, randomInInterval;
+var modnormalRandomInInterval, normalRandom, normalRandomInInterval, random, randomInInterval;
 /* RANDOM NUMBER GENERATION */
-random = function() {};
-randomInInterval = function(a, b) {};
-normalRandom = function() {};
+random = Math.random;
+randomInInterval = function(a, b) {
+  return a + random() * (b - a);
+};
+normalRandom = function() {
+  var u, v;
+  u = random();
+  v = random();
+  return sqrt(-2 * log(u)) * cos(2 * pi * v);
+};
+normalRandomInInterval = function(a, b) {
+  return a + normalRandom() * (b - a);
+};
 modnormalRandomInInterval = function(a, b, center) {
   var r;
   r = normalRandom();

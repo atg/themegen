@@ -1,13 +1,21 @@
 ### RANDOM NUMBER GENERATION ###
 
 # Generate a random number between 0 and 1
-random = ->
+random = Math.random
     
 # Generate a random number between a and b
-randomInInterval = (a, b) ->
-    
+randomInInterval = (a, b) -> a + random() * (b - a)
+
 # Generate a random number with a 95% probability of being between 0 and 1, and a good probability of being in the neighbourhood of 1/2
 normalRandom = ->
+    u = random()
+    v = random()
+    
+    return sqrt(-2 * log(u)) * cos(2 * pi * v)
+
+
+normalRandomInInterval = (a, b) -> a + normalRandom() * (b - a)
+
 
 # Generate a random number between a and b with a good probability of being in the neighbourhood of center
 modnormalRandomInInterval = (a, b, center) -> 

@@ -166,7 +166,7 @@ class CIECAM02_ViewingConditions
     # n  z  f  c  nbb  nc  ncb  fl  d
     
     # Control the background
-    setBackground: (brightness) -> [@la, @yb, @xw, @yw, @zw] = [4, brightness * 100, 95.05, 100, 108.88]
+    setBackground: (field_luminance) -> [@la, @yb, @xw, @yw, @zw] = [4, brightness * 100, 95.05, 100, 108.88]
     
     # Control the surround field
     setAverage: -> [@f, @c, @nc] = [1, 0.69, 1]

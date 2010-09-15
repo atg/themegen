@@ -1,4 +1,4 @@
-var abs, atan2, cos, euclidianMetric, exp, floor, fmod, matrixMultiply, pi, pow, round, sin, sqrt, sum, tan;
+var abs, atan2, cos, euclideanMetric, exp, floor, fmod, matrixMultiply, pi, pow, round, scale, sin, sqrt, sum, tan;
 /* CONSTANTS and FUNCTIONS */
 pow = Math.pow;
 exp = Math.exp;
@@ -24,8 +24,16 @@ sum = function(a) {
   }
   return s;
 };
-euclidianMetric = function(x, y) {
-  return sqrt(x.value * x.value + y.value * y.value);
+scale = function(a, b, k) {
+  return (1 - k) * a + k * b;
+};
+euclideanMetric = function(a, b) {
+  var x1, x2, y1, y2;
+  x1 = a.values[0];
+  x2 = b.values[0];
+  y1 = a.values[1];
+  y2 = b.values[1];
+  return sqrt(x1 * x2 + y1 * y2);
 };
 matrixMultiply = function(a, b) {
   var _a, _b, c, i, j, k, m, n, p;
