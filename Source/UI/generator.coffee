@@ -261,17 +261,19 @@ generateCIECAMColors = (theme) ->
 generateColorForZone = (theme, zone, hue_cluster) ->
     isDark = theme["is_dark"]
     hue = randomHueInCluster(hue_cluster, theme["options"]["hue_cluster_width"])
-        
+    
+    imp = 2 * zone["importance"] - 1
+    
     chroma = 0
     if (isDark)
-        chroma = randomInInterval(color_dark_chroma_min, color_dark_chroma_max)
+        chroma = randomInInterval(color_dark_chroma_min, color_dark_chroma_max) + imp * randomInInterval(importance_variation_dark_chroma_min, importance_variation_dark_chroma_max)
     else
-        chroma = randomInInterval(color_light_chroma_min, color_light_chroma_max)
+        chroma = randomInInterval(color_light_chroma_min, color_light_chroma_max) + imp * randomInInterval(importance_variation_light_chroma_min, importance_variation_light_chroma_max)
         
     if (isDark)
-        lightness = randomInInterval(color_dark_lightness_min, color_dark_lightness_max)
+        lightness = randomInInterval(color_dark_lightness_min, color_dark_lightness_max) + imp * randomInInterval(importance_variation_dark_lightness_min, importance_variation_dark_lightness_max)
     else
-        lightness = randomInInterval(color_light_lightness_min, color_light_lightness_max)
+        lightness = randomInInterval(color_light_lightness_min, color_light_lightness_max) + imp * randomInInterval(importance_variation_light_lightness_min, importance_variation_light_lightness_max)
     
     return [hue, chroma, lightness]
 

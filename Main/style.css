@@ -1,0 +1,130 @@
+html, body, div, p, pre
+{
+	padding: 0;
+	margin: 0;
+}
+*
+{
+	margin: 0;
+}
+html, body
+{
+	font: 14px "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
+	background-color: #262626;
+	
+	height: 100%;
+}
+
+.introduction
+{
+	background-color: #262626;
+	color: white;
+	padding: 6px;
+}
+.languages
+{
+	background-color: #353535;
+	color: white;
+	padding: 6px;
+}
+.languages button
+{
+	
+}
+.export
+{
+	background-color: #353535;
+	color: white;
+}
+.export button[disabled]
+{
+	color: black;
+}
+
+.viewer
+{
+	width: 100%;
+}
+.viewer pre
+{
+	color: white;
+    font: 13px "Menlo", "Consola", "Inconsolata", "DejaVu Sans Mono", mono;
+	padding: 20px;
+	float: left;
+}
+.wrapper
+{
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -2em;
+}
+
+.export, .push {
+	height: 2em;
+	clear: both;
+}
+.export p
+{
+	padding-top: 4px;
+	padding-left: 4px;
+}
+
+
+/* @group Settings */
+
+.settings
+{
+	width: 250px;
+	float: right;
+	color: white;
+	background-color: #353535;
+	padding: 14px;
+}
+.settings h2
+{
+	text-align: center;
+	font-size: 14px;
+	margin: 8px 0;
+}
+.settings h3
+{
+	font-size: 13px;
+	margin-top: 12px;
+	margin-bottom: 4px;
+}
+
+.settings button.reseed
+{
+	border-radius: 8px;
+	border: none;
+	background-color: #f3003e;
+	width: 250px;
+	height: 35px;
+	
+	color: white;
+	font-size: 14px;
+	font-weight: bold;
+	
+	margin-top: -14px;
+}
+.settings button.reseed:hover
+{
+	background-color: #f33969;
+}
+.settings button.reseed:active
+{
+	background-color: #f37b9a;
+}
+.settings p
+{
+	margin-bottom: 10px;
+}
+.settings label
+{	
+	font-size: 12px;
+	font-weight: bold;
+	color: #bfbfbf;
+}
+
+/* @end */

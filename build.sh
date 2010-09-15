@@ -15,5 +15,6 @@ coffeeprocess "Math/math"
 coffeeprocess "Math/stats"
 
 coffeeprocess "UI/generator"
+coffeeprocess "UI/rosetta"
 
 #coffee -scp --no-wrap < Source/Color/CIECAM02.coffee > Built/Color/CIECAM02.js

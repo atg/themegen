@@ -42,3 +42,16 @@ var color_dark_chroma_min = 0.3;
 var color_dark_chroma_max = 0.5;
 var color_light_chroma_min = 1.2;
 var color_light_chroma_max = 2.8;
+
+
+//Variation that "importance" can have on various properties
+
+var importance_variation_dark_lightness_min = 0.1;
+var importance_variation_dark_lightness_max = 0.1;
+var importance_variation_light_lightness_min = 0.1;
+var importance_variation_light_lightness_max = 0.1;
+
+var importance_variation_dark_chroma_min = 0.1;
+var importance_variation_dark_chroma_max = 0.1;
+var importance_variation_light_chroma_min = 0.1;
+var importance_variation_light_chroma_max = 0.1;

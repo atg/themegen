@@ -1,0 +1,168 @@
+<html>
+    <head>
+        <title>Fileability Theme Generator</title>
+        
+        <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+        
+        <script src="../Constants.js"></script>
+        <script src="Useful.js"></script>
+        
+        <script src="../Built/Color/CIECAM02.js"></script>
+        <script src="../Built/Color/CIEDE2000.js"></script>
+        <script src="../Built/Color/color.js"></script>
+        <script src="../Built/Math/kmeans.js"></script>
+        <script src="../Built/Math/math.js"></script>
+        <script src="../Built/Math/stats.js"></script>
+        <script src="../Built/UI/generator.js"></script>
+        <script src="../Built/UI/rosetta.js"></script>
+        
+        <script>
+        var currentSeed = random();
+        var currentTheme = null;
+        
+        var zones = makeZones(["comment", "function","numeric", "string", "variable", "preprocessor", "normal", "keyword"]);
+        
+        function updateTheme(seed) {
+            currentSeed = seed;
+            seed_random(seed);
+            
+            var theme = {
+                'background_lightness': "Dark",
+                'background_type': "Grayscale",
+
+                'contrast': 0.0,
+                'colorfulness': 0.0,
+
+                'hue_cluster_count': 4,
+                'hue_cluster_spacing': 80,
+                'hue_cluster_width': 45,
+
+                'zones': zones
+            };
+            
+            currentTheme = generateTheme(currentTheme);
+            applyTheme(currentTheme);
+        }
+        
+        function applyTheme(theme) {
+            //Apply the background
+            var backgroundRGBString = rgb_to_css(theme["rgb_background"]);
+            document.getElementsByTagName("html")[0].style.backgroundColor = backgroundRGBString;
+                        
+            //Apply the zones
+            for (var i = 0; i < theme["new_zones"].length; i++)
+            {
+                var zone = theme["new_zones"][i];
+                var zoneChildren = getElementsByClass(zone["name"], null, null);
+                var rgbString = rgb_to_css(zone["rgb"]);
+                
+                for (var j = 0; j < zoneChildren.length; j++)
+                {
+                    zoneChildren[j].style.color = rgbString;
+                }
+            }
+        }
+        
+        </script>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="introduction">
+                <p>Algorithmically generate text editor themes.</p>
+            </div>
+        
+            <div class="languages">
+                <b>Display Language:</b>
+                <button>HTML</button>
+                <button>C</button>
+                <button>Ruby</button>
+                <button>Objective-C</button>
+            </div>
+        
+            <div class="viewer">
+<pre><code class="code"><span class="preprocessor">#import </span><span class="string">&lt;stdio.h&gt;</span>
+
+<span class="comment">//Answers questions such as "What is 6 * 7?" or "What is 34 + 8?"</span>
+<span class="keyword">int</span> <span class="function">main</span><span class="normal">(</span><span class="keyword">void</span><span class="normal">)
+{</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span> <span class="variable">num</span> <span class="normal">=</span> <span class="numeric">42</span><span class="normal">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">printf</span><span class="normal">(</span><span class="string">"The answer is %d"</span><span class="normal">, </span> <span class="variable">num</span><span class="normal">)</span><span class="normal">;</span>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="constant">EXIT_SUCCESS</span><span class="normal">;</span>
+<span class="normal">}</span></code></pre>
+                <div class="settings">
+                    <button class="reseed">Reseed</button>
+                    <h3>Recent Seeds</h3>
+                    <ul>
+                        <li>123</li>
+                        <li>456</li>
+                    </ul>
+                
+                    <h3>Background</h3>
+                    <p>
+                        <label for="background_lightness">Polarity<br></label>
+                        <select name="background_lightness" class='popup'>
+                            <option>Either</option>
+                            <hr>
+                            <option>Light</option>
+                            <option>Dark</option>
+                        </select>
+                    </p>
+                    
+                    <p>
+                        <label for="background_type">Background Type<br></label>
+                        <select class='background_type'>
+                            <option>Any</option>
+                            <hr>
+                            <option>Black &amp; White</option>
+                            <option>Grayscale</option>
+                            <option>Neutral Colours</option>
+                        </select>
+                    </p>
+                    
+                    <h3>Global Tweakage</h3>
+                    <p>
+                        <label for="contrast">Contrast<br></label>
+                        <input name="contrast" type="range" min="-1" max="1" step="0.2" value="0">
+                    </p>
+                    
+                    <p>
+                        <label for="colorfulness">Colourfulness<br></label>
+                        <input name="colorfulness" type="range" min="-1" max="1" step="0.2" value="0">
+                    </p>
+                    
+                    
+                    <h3>Clustering</h3>
+                    <p>
+                        <label for="hue_cluster_count">Cluster Count<br></label>
+                        <input name="hue_cluster_count" type="range" min="1" max="6" step="1" value="4">
+                    </p>
+                    
+                    <p>
+                        <label for="hue_cluster_width">Cluster Width<br></label>
+                        <input name="hue_cluster_width" type="range" min="10" max="180" step="10" value="40">
+                    </p>
+                    
+                    <p>
+                        <label for="hue_cluster_spacing">Maximum Cluster Distance<br></label>
+                        <input name="hue_cluster_spacing" type="range" min="10" max="180" step="10" value="100">
+                    </p>
+                </div>
+            </div>
+            <div class="push"></div>
+        </div>
+        
+        <div class="Export">
+            <p>
+                <b>Export:</b>
+                <button>TextMate</button>
+                <button>Vim</button>
+                <button>Emacs</button>
+                <button>Espresso</button>
+                <button>Pygments</button>
+                <a href="http://chocolatapp.com"><button>Chocolat</button></a>
+            </p>
+        </div>
+        
+    </body>
+</html>
