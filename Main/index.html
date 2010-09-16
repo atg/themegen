@@ -73,13 +73,31 @@
             seedLinks.innerHTML = seedLinksHTML;
         }
         
-        function updateTheme(seed) {            
+        function refreshTheme() {
+            updateTheme(currentSeed);
+        }
+        
+        function updateTheme(seed) {           
             //Seed and add to local storage
             currentSeed = seed;
             seedrandom(String(seed));
             
             updateSeedLinks();
             
+            var fields = ["background_lightness", "background_type", "contrast", "colorfulness", "hue_cluster_count", "hue_cluster_spacing", "hue_cluster_width"];
+            var theme = { 'zones': zones };
+            
+            
+            for (var i = 0; i < fields.length; i++)
+            {
+                var element = document.getElementById(fields[i]);
+                if (element.selection === null || typeof(element.selection) === "undefined")
+                    theme[fields[i]] = element.value;
+                else
+                    theme[fields[i]] = element.selection;
+            }
+                        
+            /*
             var theme = {
                 'background_lightness': "Dark",
                 'background_type': "Neutral",
@@ -92,7 +110,8 @@
                 'hue_cluster_width': 45,
 
                 'zones': zones
-            };
+            };*/
+            
             
             currentTheme = generateTheme(theme);
             applyTheme(currentTheme);
@@ -163,7 +182,7 @@
                     <h3>Background</h3>
                     <p>
                         <label for="background_lightness">Polarity<br></label>
-                        <select name="background_lightness" class='popup'>
+                        <select name="background_lightness" id="background_lightness" class='popup' onChange='refreshTheme()'>
                             <option>Either</option>
                             <hr>
                             <option>Light</option>
@@ -173,41 +192,41 @@
                     
                     <p>
                         <label for="background_type">Background Type<br></label>
-                        <select class='background_type'>
+                        <select class='background_type' id="background_type" onChange='refreshTheme()'>
                             <option>Any</option>
                             <hr>
                             <option>Black &amp; White</option>
                             <option>Grayscale</option>
-                            <option>Neutral Colours</option>
+                            <option>Neutral</option>
                         </select>
                     </p>
                     
                     <h3>Global Tweakage</h3>
                     <p>
                         <label for="contrast">Contrast<br></label>
-                        <input name="contrast" type="range" min="-1" max="1" step="0.2" value="0">
+                        <input name="contrast" id="contrast" type="range" min="-1" max="1" step="0.2" value="0" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="colorfulness">Colourfulness<br></label>
-                        <input name="colorfulness" type="range" min="-1" max="1" step="0.2" value="0">
+                        <input name="colorfulness" id="colorfulness" type="range" min="-1" max="1" step="0.2" value="0" onChange='refreshTheme()'>
                     </p>
                     
                     
                     <h3>Clustering</h3>
                     <p>
                         <label for="hue_cluster_count">Cluster Count<br></label>
-                        <input name="hue_cluster_count" type="range" min="1" max="6" step="1" value="4">
+                        <input name="hue_cluster_count" id="hue_cluster_count" type="range" min="1" max="6" step="1" value="4" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="hue_cluster_width">Cluster Width<br></label>
-                        <input name="hue_cluster_width" type="range" min="10" max="180" step="10" value="40">
+                        <input name="hue_cluster_width" id="hue_cluster_width" type="range" min="10" max="180" step="10" value="40" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="hue_cluster_spacing">Maximum Cluster Distance<br></label>
-                        <input name="hue_cluster_spacing" type="range" min="10" max="180" step="10" value="100">
+                        <input name="hue_cluster_spacing" id="hue_cluster_spacing" type="range" min="10" max="180" step="10" value="80" onChange='refreshTheme()'>
                     </p>
                 </div>
             </div>

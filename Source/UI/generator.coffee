@@ -148,6 +148,15 @@ generateBackgroundColor = (theme) ->
     lightness = 1.0
     discrete_chroma = theme["options"]["background_type"] # "Black & White", "Grayscale", "Neutral"
     
+    if discrete_chroma == "Any"
+        r = random()
+        if r < 0.3
+            discrete_chroma = "Black & White"
+        else if 0.3 < r < 0.6
+            discrete_chroma = "Grayscale"
+        else
+            discrete_chroma = "Neutral"
+    
     if discrete_chroma == "Black & White"
         if isDark
             lightness = bw_black

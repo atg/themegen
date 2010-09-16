@@ -103,7 +103,7 @@ generateHueClusters = function(theme) {
   return theme;
 };
 generateBackgroundColor = function(theme) {
-  var c, chroma, discrete_chroma, discrete_lightness, hue, isDark, lightness, plain_vc, primary_cluster, rgb;
+  var c, chroma, discrete_chroma, discrete_lightness, hue, isDark, lightness, plain_vc, primary_cluster, r, rgb;
   discrete_lightness = theme["options"]["background_lightness"];
   isDark = false;
   if (discrete_lightness === "Dark") {
@@ -116,6 +116,16 @@ generateBackgroundColor = function(theme) {
   theme["is_dark"] = isDark;
   lightness = 1.0;
   discrete_chroma = theme["options"]["background_type"];
+  if (discrete_chroma === "Any") {
+    r = random();
+    if (r < 0.3) {
+      discrete_chroma = "Black & White";
+    } else if ((0.3 < r) && (r < 0.6)) {
+      discrete_chroma = "Grayscale";
+    } else {
+      discrete_chroma = "Neutral";
+    }
+  }
   if (discrete_chroma === "Black & White") {
     if (isDark) {
       lightness = bw_black;
