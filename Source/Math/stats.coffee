@@ -1,7 +1,7 @@
 ### RANDOM NUMBER GENERATION ###
 
 # Generate a random number between 0 and 1
-random = Math.random
+#random = Math.random
     
 # Generate a random number between a and b
 randomInInterval = (a, b) -> a + random() * (b - a)

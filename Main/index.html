@@ -1,9 +1,10 @@
 <html>
     <head>
         <title>Fileability Theme Generator</title>
-        
+        <!-- 402331990 -->
         <link rel="stylesheet" href="style.css" type="text/css" media="screen">
         
+        <script src="Random.js"></script>
         <script src="../Constants.js"></script>
         <script src="Useful.js"></script>
         
@@ -17,18 +18,71 @@
         <script src="../Built/UI/rosetta.js"></script>
         
         <script>
-        var currentSeed = random();
+        var currentSeed = null;
         var currentTheme = null;
         
-        var zones = makeZones(["comment", "function","numeric", "string", "variable", "preprocessor", "normal", "keyword"]);
+        var zones = makeZones(["comment", "function","numeric", "string", "variable", "constant", "preprocessor", "normal", "keyword"]);
         
-        function updateTheme(seed) {
+        function reseed() {
+            currentSeed = String(Math.abs(~new Date().getTime()));
+            localStorage.setItem(String(localStorage.length), currentSeed);
+        }
+        
+        function loaded() {
+            if (localStorage.length === 0)
+                reseed();
+            else
+                currentSeed = localStorage.getItem(String(localStorage.length - 1));
+            
+            updateTheme(currentSeed);
+        }
+        
+        function reseedButton() {
+            reseed();
+            
+            updateTheme(currentSeed);
+        }
+        function importSeedButton() {
+            var newSeed = prompt("If someone gave you a seed, please paste it here:");
+            if (newSeed === "" || newSeed === null || typeof newSeed === "undefined")
+                return;
+            
+            currentSeed = newSeed;
+            localStorage.setItem(String(localStorage.length), currentSeed);
+            updateTheme(currentSeed);
+        }
+        
+        function updateSeedLinks() {
+            var seedLinksElement = document.getElementById("seedLinks");
+            
+            var seedLinksHTML = "";
+            
+            var count = 0;            
+            for (i = localStorage.length - 1; i >= 0 && count < 10; i--)
+            {
+                var s = localStorage.getItem(String(i));
+                if (s === null || typeof s === "undefined")
+                    continue;
+                
+                var liHTML = "<li " + (s == currentSeed ? "class='selected' " : "") + "onclick='updateTheme(" + s + ")'>" + s + "</li>\n";
+                
+                seedLinksHTML += liHTML;
+                count++;
+            }
+            
+            seedLinks.innerHTML = seedLinksHTML;
+        }
+        
+        function updateTheme(seed) {            
+            //Seed and add to local storage
             currentSeed = seed;
-            seed_random(seed);
+            seedrandom(String(seed));
+            
+            updateSeedLinks();
             
             var theme = {
                 'background_lightness': "Dark",
-                'background_type': "Grayscale",
+                'background_type': "Neutral",
 
                 'contrast': 0.0,
                 'colorfulness': 0.0,
@@ -40,7 +94,7 @@
                 'zones': zones
             };
             
-            currentTheme = generateTheme(currentTheme);
+            currentTheme = generateTheme(theme);
             applyTheme(currentTheme);
         }
         
@@ -64,8 +118,17 @@
         }
         
         </script>
+        
+        <style>
+            .keyword, .preprocessor {
+                font-weight: bold;
+            }
+            .comment {
+                font-style: italic;
+            }
+        </style>
     </head>
-    <body>
+    <body onLoad="loaded()">
         <div class="wrapper">
             <div class="introduction">
                 <p>Algorithmically generate text editor themes.</p>
@@ -91,11 +154,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="constant">EXIT_SUCCESS</span><span class="normal">;</span>
 <span class="normal">}</span></code></pre>
                 <div class="settings">
-                    <button class="reseed">Reseed</button>
+                    <button class="reseed" onClick="reseedButton()">Reseed</button>
+                    <button class="import-seed" onClick="importSeedButton()">Import Seed</button>
                     <h3>Recent Seeds</h3>
-                    <ul>
-                        <li>123</li>
-                        <li>456</li>
+                    <ul id="seedLinks">
                     </ul>
                 
                     <h3>Background</h3>
@@ -163,6 +225,6 @@
                 <a href="http://chocolatapp.com"><button>Chocolat</button></a>
             </p>
         </div>
-        
+    
     </body>
 </html>

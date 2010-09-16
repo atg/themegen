@@ -1,6 +1,5 @@
-var modnormalRandomInInterval, normalRandom, normalRandomInInterval, random, randomInInterval;
+var modnormalRandomInInterval, normalRandom, normalRandomInInterval, randomInInterval;
 /* RANDOM NUMBER GENERATION */
-random = Math.random;
 randomInInterval = function(a, b) {
   return a + random() * (b - a);
 };

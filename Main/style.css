@@ -10,9 +10,11 @@ html, body, div, p, pre
 html, body
 {
 	font: 14px "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
-	background-color: #262626;
 	
 	height: 100%;
+}
+html {
+	background-color: #262626;
 }
 
 .introduction
@@ -48,7 +50,7 @@ html, body
 .viewer pre
 {
 	color: white;
-    font: 13px "Menlo", "Consola", "Inconsolata", "DejaVu Sans Mono", mono;
+    font: 12px "Menlo", "Consola", "Inconsolata", "DejaVu Sans Mono", mono;
 	padding: 20px;
 	float: left;
 }
@@ -94,6 +96,33 @@ html, body
 	margin-bottom: 4px;
 }
 
+.settings ul
+{
+	list-style-type: square;
+}
+.settings li
+{
+	color: #bfbfbf;
+	cursor: pointer;
+}
+.settings li:hover
+{
+	color: #e0e0e0;
+	text-decoration: underline;
+}
+.settings li:active
+{
+	color: white;
+	text-decoration: underline;
+}
+.settings li.selected
+{
+	font-weight: bold;
+	color: white;
+}
+
+/* @group Reseed Button */
+
 .settings button.reseed
 {
 	border-radius: 8px;
@@ -116,6 +145,37 @@ html, body
 {
 	background-color: #f37b9a;
 }
+
+/* @end */
+
+/* @group Import Seed Button */
+
+.settings button.import-seed
+{
+	margin-left: 50px;
+	margin-top:  8px;
+	
+	border-radius: 8px;
+	border: none;
+	background-color: #fff;
+	width: 150px;
+	height: 30px;
+	
+	color: black;
+	font-size: 14px;
+	font-weight: bold;	
+}
+.settings button.import-seed:hover
+{
+	background-color: #f3e3e7;
+}
+.settings button.import-seed:active
+{
+	background-color: #f3ced7;
+}
+
+/* @end */
+
 .settings p
 {
 	margin-bottom: 10px;
