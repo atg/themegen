@@ -76,21 +76,27 @@ generateHueClusters = (theme) ->
     if hue_count > 6
         hue_count = 6
     
+    hue_count = 7 #floor(randomInInterval(2, 6))
+    
     # hue_width must be between 10 and 360 / (hue_count + 1)
     hue_width = options['hue_cluster_width']
-    if hue_width < 10
-        hue_width = 10
-    else if hue_width > 360 / (hue_count + 1)
-        hue_width = 360 / (hue_count + 1)
+    #if hue_width < 10
+    #    hue_width = 10
+    #else if hue_width > 360 / (hue_count + 1)
+    #    hue_width = 360 / (hue_count + 1)
     
     # hue_spacing must be between 10 and (360 - hue_count * hue_width) / hue_count
     hue_spacing = options['hue_cluster_spacing']
-    if hue_spacing < 10
-        hue_spacing = 10
-    else if hue_spacing > (360 - hue_count * hue_width) / hue_count
-        hue_spacing = (360 - hue_count * hue_width) / hue_count
+    #if hue_spacing < 10
+    #    hue_spacing = 10
+    #else if hue_spacing > (360 - hue_count * hue_width) / hue_count
+    #    hue_spacing = (360 - hue_count * hue_width) / hue_count
     
-    hue_radius = hue_width / 2
+    hue_sample_radius = hue_width / 2
+    hue_area_radius = hue_spacing / 2
+    
+    #hue_count = floor(randomInInterval(2, 5))
+    hue_width = sample_range
     
     
     # Set the options to their new values
@@ -100,30 +106,64 @@ generateHueClusters = (theme) ->
     
     
     # Generate clusters
+    
+    # Generate an initial cluster
+    initial_cluster = randomInInterval(0, 360)
+    hue_clusters.push(initial_cluster)
+    
+    #cluster_maximum_coverage = randomInInterval(90, 360)
+    
+    cluster_boundary_radius = cluster_boundary_range / 2
+    cluster_maximum_coverage_radius = cluster_maximum_coverage / 2
+    
     limit = 150
     for i in [0..limit]        
         # If there's already enough clusters, stop
         if hue_clusters.length >= hue_count
             break
-        
-        # Generate a new cluster center
-        center = randomInInterval(0, 360)
-        
-        # If i == limit, then we just add the cluster regardless
+                
+        center = ffmod(randomInInterval(initial_cluster - cluster_maximum_coverage_radius, initial_cluster + cluster_maximum_coverage_radius), 360)
         clusterIsInvalid = false
-        if i != limit
-            for j in [0...(hue_clusters.length)]
-                if (center > hue_clusters[i] && hue_clusters[i] + hue_width / 2 > center) || (center < hue_clusters[i] && hue_clusters[i] - hue_width / 2 < center)
+        if i < limit - 20
+            for c in hue_clusters
+                if angle_in_interval(center, ffmod(c - cluster_boundary_radius, 360), ffmod(c + cluster_boundary_radius, 360))
                     clusterIsInvalid = true
                     break
-                if (center > hue_clusters[i] && center - (hue_clusters[i] + hue_radius) > hue_spacing) || (center < hue_clusters[i] && (hue_clusters[i] - hue_radius) - center > hue_spacing)
-                   clusterIsInvalid = true
-                   break
         
         if clusterIsInvalid == false
             hue_clusters.push(center)
+        
+        # Generate a new cluster center
+        #if hue_clusters.length > 0
+        #    center = randomInInterval(hue_clusters[0] - hue_area_radius, hue_clusters[0] + hue_area_radius) % 360
+        #else
+        #center = randomInInterval(0, 360)
+        
+        # If i == limit, then we just add the cluster regardless
+        #clusterIsInvalid = false
+        # if i != limit
+        #             for c in hue_clusters
+        #                 if (center > c && center < (c + hue_radius) % 360) || (center < c && center > (c - hue_radius) % 360)
+        #                     clusterIsInvalid = true
+        #         
+        
+        # if i != limit
+        #             for j in [0...(hue_clusters.length)]
+        #                 if (center > hue_clusters[i] && hue_clusters[i] + hue_width / 2 > center) || (center < hue_clusters[i] && hue_clusters[i] - hue_width / 2 < center)
+        #                     clusterIsInvalid = true
+        #                     break
+        #                 if (center > hue_clusters[i] && center - (hue_clusters[i] + hue_radius) > hue_spacing) || (center < hue_clusters[i] && (hue_clusters[i] - hue_radius) - center > hue_spacing)
+        #                    clusterIsInvalid = true
+        #                    break
+        #         
+
+    
+    #hue_clusters = [20, 120, 240]
     
     theme["hue_clusters"] = hue_clusters
+    
+    #alert(hue_count)
+    #alert(JSON.stringify(hue_clusters))
     
     return theme
 
@@ -234,16 +274,8 @@ randomHueInCluster = (primary_cluster, width) ->
     a = primary_cluster - width / 2
     b = primary_cluster + width / 2
     
-    r = normalRandom()
-    r *= b - a
-    r += a
-    
-    if r < 0
-        while r < 0
-            r += 360
-    else if r > 360
-        while r > 360
-            r -= 360
+    r = a + random() * (b - a)
+    r = ffmod(r, 360)
     
     return r
     #return modnormalRandomInInterval(, , primary_cluster)
@@ -296,14 +328,23 @@ contrast_function = (k, x, mu) ->
         f(1, x) = {1, 0}
     ###
     
+    k -= 1
+    
     if k == 0
         return x
+    
+    ###
+    if k < 0
+        return scale(0, x, 1 + k)
+    else
+        return scale(x, 1, k)
+    ###
     
     if k < 0
         if x < mu
             return scale(x, mu, -k)
         else
-            return scale(mu, x, k - 1)
+            return scale(mu, x, 1 + k)
     else
         if x < mu
             return scale(0, x, 1 - k)
@@ -317,13 +358,15 @@ saturation_function = (k, x) ->
         f(1, x) = 1
     ###
     
+    k -= 1
+    
     if k == 0
         return x
     
     if k < 0
-        return scale(0, x, 1 - k)
+        return scale(0, x, 1 + k)
     else
-        return scale(x, 1, k)
+        return scale(x, 1.6, k)
 
 
 applyPostProcessing = (theme) ->
@@ -357,6 +400,8 @@ generateRGBColors = (theme) ->
     rgb_background = theme["rgb_background"]
     background_vc = new CIECAMColor.normalVC()#vcWithBackground(rgb_background[0] * 255, rgb_background[1] * 255, rgb_background[2] * 255)
     
+    #alert(JSON.stringify(theme["new_zones"]))
+    
     for zone in theme["new_zones"]
         if zone["name"] == "normal"
             if theme["is_dark"]
@@ -370,5 +415,4 @@ generateRGBColors = (theme) ->
             else
                 c = new LABColor(zone["color"][0] * 2 * pi / 360, zone["color"][1], zone["color"][2])
                 zone["rgb"] = c.asLRGB()
-        #alert(zone["rgb"])
         

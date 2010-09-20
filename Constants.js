@@ -1,5 +1,9 @@
 //Constants.js
 
+var sample_range = 0;
+var cluster_boundary_range = 40;
+var cluster_maximum_coverage = 200;
+
 //***** These constants control the background *****
 //Note that lightness constants are inverted for light themes
 var bw_black = 0.1; //The black that corresponds to Black&White + Dark

@@ -20,3 +20,19 @@ function makeZones(zoneNames) {
     }
     return newZones;
 }
+
+function makeZones2(zoneDescriptions) {
+    var newzones = [];
+    for (i = 0; i < zoneDescriptions.length; i++) {
+        var zoneDesc = zoneDescriptions[i];
+        
+        // [likeness, importance, name]
+        var zone = {
+            'likeness':zoneDesc[0],
+            'importance':zoneDesc[1],
+            'name':zoneDesc[2].replace(".", "_")
+        }
+        newzones.push(zone);
+    }
+    return newzones;
+}

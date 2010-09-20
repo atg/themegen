@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="style.css" type="text/css" media="screen">
         
         <script src="Random.js"></script>
+        <script src="json.js"></script>
         <script src="../Constants.js"></script>
         <script src="Useful.js"></script>
         
@@ -21,7 +22,31 @@
         var currentSeed = null;
         var currentTheme = null;
         
-        var zones = makeZones(["comment", "function","numeric", "string", "variable", "constant", "preprocessor", "normal", "keyword"]);
+        var zones = makeZones2([
+        [0.1336, 0.4572, "literal.string"],
+        [0.3484, 0.5642, "literal.numeric"],
+        [0.3819, 0.7, "literal.keyword"],
+        [0.1342, 0.5223, "literal.escape.string"],
+        //[0.3484, 0.5891, "literal.numeric.float"],
+        //[0.2465, 0.4909, "literal.character"],
+        //[0.2478, 0.5573, "literal.escape.character"],
+        [1, 0.5, "identifier"],
+        [0.782, 0.4, "identifier.function"],
+        //[0.6864, 0.5, "identifier.type"],
+        [0.6, 0.5871, "identifier.variable.constant"],
+        //[0.7, 0.1477, "identifier.variable.instance"],
+        //[0.3781, 0.8323, "identifier.variable.parameter"],
+        [0.5, 1, "keyword.control"],
+        //[0.6832, 0.8425, "keyword.storage"],
+        [0.0005, 0, "metadata.comment"],
+        [0.4545, 0.8127, "metadata.processing.directive"],
+        [0.0773, 0.2439, "metadata.processing.line"],
+        //[0.0095, 0.0822, "metadata.embedded"],
+        [0.5, 0.1579, "operator"],
+        //[0.6275, 0.653, "tag"],
+        //[1, 0.2, "tag.delimiter"],
+        //[0.6419, 0.335, "tag.attribute"],
+        [0.05, 0.5, "normal"]]);
         
         function reseed() {
             currentSeed = String(Math.abs(~new Date().getTime()));
@@ -114,6 +139,7 @@
             
             
             currentTheme = generateTheme(theme);
+            //alert(currentTheme["zone_clusters"][0].length);
             applyTheme(currentTheme);
         }
         
@@ -139,10 +165,10 @@
         </script>
         
         <style>
-            .keyword, .preprocessor {
+            .keyword_control, .keyword_storage, .metadata_processing_directive {
                 font-weight: bold;
             }
-            .comment {
+            .metadata_comment {
                 font-style: italic;
             }
         </style>
@@ -162,15 +188,15 @@
             </div>
         
             <div class="viewer">
-<pre><code class="code"><span class="preprocessor">#import </span><span class="string">&lt;stdio.h&gt;</span>
+<pre><code class="code"><span class="metadata_processing_directive">#import </span><span class="metadata_processing_line">&lt;stdio.h&gt;</span>
 
-<span class="comment">//Answers questions such as "What is 6 * 7?" or "What is 34 + 8?"</span>
-<span class="keyword">int</span> <span class="function">main</span><span class="normal">(</span><span class="keyword">void</span><span class="normal">)
+<span class="metadata_comment">//Answers questions such as "What is 6 * 7?" or "What is 34 + 8?"</span>
+<span class="keyword_control">int</span> <span class="identifier_function">main</span><span class="normal">(</span><span class="keyword_control">void</span><span class="normal">)
 {</span>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">int</span> <span class="variable">num</span> <span class="normal">=</span> <span class="numeric">42</span><span class="normal">;</span>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">printf</span><span class="normal">(</span><span class="string">"The answer is %d"</span><span class="normal">, </span> <span class="variable">num</span><span class="normal">)</span><span class="normal">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword_control">int</span> <span class="identifier">num</span> <span class="operator">=</span> <span class="literal_numeric">42</span><span class="normal">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="identifier_function">printf</span><span class="normal">(</span><span class="literal_string">"The answer is <span class="literal_escape_string">%d"</span></span><span class="normal">, </span> <span class="identifier">num</span><span class="normal">)</span><span class="normal">;</span>
 
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="constant">EXIT_SUCCESS</span><span class="normal">;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword_control">return</span> <span class="identifier_variable_constant">EXIT_SUCCESS</span><span class="normal">;</span>
 <span class="normal">}</span></code></pre>
                 <div class="settings">
                     <button class="reseed" onClick="reseedButton()">Reseed</button>
@@ -204,29 +230,29 @@
                     <h3>Global Tweakage</h3>
                     <p>
                         <label for="contrast">Contrast<br></label>
-                        <input name="contrast" id="contrast" type="range" min="-1" max="1" step="0.2" value="0" onChange='refreshTheme()'>
+                        <input name="contrast" id="contrast" type="range" min="0" max="2" step="0.2" value="1" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="colorfulness">Colourfulness<br></label>
-                        <input name="colorfulness" id="colorfulness" type="range" min="-1" max="1" step="0.2" value="0" onChange='refreshTheme()'>
+                        <input name="colorfulness" id="colorfulness" type="range" min="0" max="2" step="0.2" value="1" onChange='refreshTheme()'>
                     </p>
                     
                     
                     <h3>Clustering</h3>
                     <p>
                         <label for="hue_cluster_count">Cluster Count<br></label>
-                        <input name="hue_cluster_count" id="hue_cluster_count" type="range" min="1" max="6" step="1" value="4" onChange='refreshTheme()'>
+                        <input name="hue_cluster_count" id="hue_cluster_count" type="range" min="1" max="6" step="1" value="3" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="hue_cluster_width">Cluster Width<br></label>
-                        <input name="hue_cluster_width" id="hue_cluster_width" type="range" min="10" max="180" step="10" value="40" onChange='refreshTheme()'>
+                        <input name="hue_cluster_width" id="hue_cluster_width" type="range" min="0" max="360" step="5" value="20" onChange='refreshTheme()'>
                     </p>
                     
                     <p>
                         <label for="hue_cluster_spacing">Maximum Cluster Distance<br></label>
-                        <input name="hue_cluster_spacing" id="hue_cluster_spacing" type="range" min="10" max="180" step="10" value="80" onChange='refreshTheme()'>
+                        <input name="hue_cluster_spacing" id="hue_cluster_spacing" type="range" min="0" max="360" step="5" value="120" onChange='refreshTheme()'>
                     </p>
                 </div>
             </div>

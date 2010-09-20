@@ -18,6 +18,22 @@ pi = Math.PI
 
 fmod = (x, n) -> x % n
 
+ffmod = (x, n) ->
+    for i in [0...150]
+        if x < 0
+            x += n
+        else if x > n
+            x -= n
+        else
+            return x
+
+angle_in_interval = (c, a, b) ->
+    if a <= b
+        return a <= c <= b
+    else
+        return a <= c <= 360 || 0 <= c <= b
+
+
 sum = (a) ->
     s = 0
     for x in a.sort()
@@ -28,12 +44,15 @@ scale = (a, b, k) -> (1 - k) * a  +  k * b
 
 euclideanMetric = (a, b) ->
     x1 = a.values["likeness"]
-    x2 = b.values["importance"]
+    x2 = b.values["likeness"]
     
-    y1 = a.values["likeness"]
+    y1 = a.values["importance"]
     y2 = b.values["importance"]
     
-    return sqrt(x1 * x2  +  y1 * y2)
+    x = x1 - x2
+    y = y1 - y2
+    
+    return sqrt(x*x - y*y)
 
 maximum = (xs) ->
     maxV = null

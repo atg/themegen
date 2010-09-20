@@ -1,10 +1,12 @@
-var centroid, closest, find_groupings, find_initial_means, kmeans, max_difference, update_means;
+var centroid, closest, find_groupings, find_initial_groupings, kmeans, max_difference, update_means;
 kmeans = function(k, points, metric) {
-  var groupings, means, old_means, threshhold;
-  means = find_initial_means(k, points, metric);
+  var groupings, i, means, old_means, threshhold;
+  groupings = find_initial_groupings(k, points, metric);
+  return groupings;
+  means = update_means(k, groupings);
   groupings = null;
   threshhold = 1e-5;
-  while (true) {
+  for (i = 1; i <= 25; i++) {
     groupings = find_groupings(k, points, means, metric);
     old_means = means.slice(0);
     means = update_means(k, groupings);
@@ -12,21 +14,113 @@ kmeans = function(k, points, metric) {
       break;
     }
   }
+  alert(JSON.stringify(groupings.map(function(a) {
+    return a.length;
+  })));
   return groupings;
 };
-find_initial_means = function(k, points, metric) {
-  var i, l, means, position;
-  l = floor(points.length / k);
-  position = 0;
+find_initial_groupings = function(k, points, metric) {
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, all_indexes, grouping, i, index, index_index, indexes, initialGroupings, j, m, max_count, means, min_count, n_index, nearest, nearestGrouping, s, smallest, targetGrouping;
   means = [];
+  /*
+  for i in [0...k]
+      mean =
+          'values':
+              'likeness': random()
+              'importance': random()
+
+      means.push(mean)
+  */
+  /*
+  angle = randomInInterval(0, 2 * pi)
+  for i in [0...k]
+      mean =
+          'values':
+              'likeness': 0.5 * cos(angle) + 0.5
+              'importance': 0.5 * sin(angle) + 0.5
+
+      means.push(mean)
+
+      angle += 2 * pi / k
+      angle = angle % 2 * pi
+  */
+  all_indexes = (function() {
+    _a = []; _b = points.length;
+    for (i = 0; (0 <= _b ? i < _b : i > _b); (0 <= _b ? i += 1 : i -= 1)) {
+      _a.push(i);
+    }
+    return _a;
+  })();
+  indexes = [];
   for (i = 0; (0 <= k ? i < k : i > k); (0 <= k ? i += 1 : i -= 1)) {
-    if (i === k - 1) {
-      means[i] = centroid(points.slice(position));
-    } else {
-      means[i] = centroid(points.slice(position, position + l));
-      position += l;
+    index_index = floor(randomInInterval(0, all_indexes.length));
+    index = all_indexes[index_index];
+    all_indexes.splice(index_index, 1);
+    indexes.push(index);
+    means.push(points[index]);
+  }
+  initialGroupings = find_groupings(k, points, means, metric);
+  min_count = floor(points.length / k);
+  max_count = min_count + 1;
+  _d = initialGroupings;
+  for (_c = 0, _e = _d.length; _c < _e; _c++) {
+    grouping = _d[_c];
+    if (grouping.length > min_count) {
+      continue;
+    }
+    _f = (min_count - grouping.length);
+    for (j = 0; (0 <= _f ? j < _f : j > _f); (0 <= _f ? j += 1 : j -= 1)) {
+      m = centroid(grouping);
+      if (typeof m === "undefined") {
+        break;
+      }
+      nearest = null;
+      smallest = -1;
+      nearestGrouping = null;
+      _h = initialGroupings;
+      for (_g = 0, _i = _h.length; _g < _i; _g++) {
+        targetGrouping = _h[_g];
+        if (targetGrouping.length <= max_count) {
+          continue;
+        }
+        n_index = closest(targetGrouping, m, metric);
+        if (n_index === -1) {
+          continue;
+        }
+        s = metric(targetGrouping[n_index], m);
+        if (smallest === -1 || s < smallest) {
+          smallest = s;
+          nearest = targetGrouping[n_index];
+          nearestGrouping = targetGrouping;
+        }
+      }
+      if (smallest === -1) {
+        break;
+      }
+      nearestGrouping.splice(nearestGrouping.indexOf(nearest), 1);
+      grouping.push(nearest);
     }
   }
+  return initialGroupings;
+  means = update_means(k, initialGroupings);
+  alert(JSON.stringify(initialGroupings.map(function(a) {
+    return a.length;
+  })));
+  /*
+  # We just choose arbitrary means here, but it would be better to chose them agglomeratively
+  l = floor(points.length / k)
+
+  position = 0
+  means = []
+  for i in [0...k]
+      if i == k - 1
+          means[i] = centroid(points.slice(position))
+      else
+          means[i] = centroid(points.slice(position, position + l))
+          position += l
+
+  return means
+  */
   return means;
 };
 update_means = function(k, groupings) {

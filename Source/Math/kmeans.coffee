@@ -1,25 +1,121 @@
 # Group `points` into `k` clusters by distance. Distance is defined as `metric(a, b)`
 kmeans = (k, points, metric) ->
     # Generate some inital means
-    means = find_initial_means(k, points, metric)
+    groupings = find_initial_groupings(k, points, metric)
+    #alert(JSON.stringify(groupings.map((a) -> a.length)))
+    return groupings
+    
+    means = update_means(k, groupings)
     groupings = null
     threshhold = 1e-5
     
     # Loop indefinitely until convergence is achieved
-    loop
+    for i in [1..25]
         groupings = find_groupings(k, points, means, metric)
         
         old_means = means.slice(0) # Copy the array
         means = update_means(k, groupings)
         
+        #alert(JSON.stringify(means))
+        
         if max_difference(old_means, means, metric) < threshhold
             break
-    
+    alert(JSON.stringify(groupings.map((a) -> a.length)))
+        
     return groupings
+    
 
+# Find initial groupings
+find_initial_groupings = (k, points, metric) ->
+    means = []
+    
+    ###
+    for i in [0...k]
+        mean =
+            'values':
+                'likeness': random()
+                'importance': random()
+        
+        means.push(mean)
+    ###
+    
+    ###
+    angle = randomInInterval(0, 2 * pi)
+    for i in [0...k]
+        mean =
+            'values':
+                'likeness': 0.5 * cos(angle) + 0.5
+                'importance': 0.5 * sin(angle) + 0.5
+        
+        means.push(mean)
 
-# Find initial means
-find_initial_means = (k, points, metric) ->
+        angle += 2 * pi / k
+        angle = angle % 2 * pi
+    ###
+    
+    # Work out some rough means by taking random indexes
+    all_indexes = i for i in [0...points.length]
+    indexes = []
+    for i in [0...k]
+        index_index = floor(randomInInterval(0, all_indexes.length))
+        
+        index = all_indexes[index_index]
+        all_indexes.splice(index_index, 1)
+        
+        indexes.push(index)
+        means.push(points[index])
+    
+    # Find all the points associated with this mean
+    initialGroupings = find_groupings(k, points, means, metric)
+    
+    # Each grouping should have floor(|points|/k) items
+    min_count = floor(points.length / k)
+    max_count = min_count + 1
+    for grouping in initialGroupings
+        # If this grouping has enough items, continue
+        if grouping.length > min_count
+            continue
+        
+        # Otherwise, take the nearest item that isn't in the group
+        for j in [0...(min_count - grouping.length)]
+            m = centroid(grouping)
+            if typeof m == "undefined"
+                break
+            
+            nearest = null
+            smallest = -1
+            nearestGrouping = null
+            for targetGrouping in initialGroupings
+                if targetGrouping.length <= max_count
+                    continue
+                
+                n_index = closest(targetGrouping, m, metric)
+                if n_index == -1
+                    continue
+                
+                s = metric(targetGrouping[n_index], m)
+                
+                if smallest == -1 || s < smallest
+                    smallest = s
+                    nearest = targetGrouping[n_index]
+                    nearestGrouping = targetGrouping
+            
+            if smallest == -1
+                #alert("SMALLEST == -1")
+                break
+            
+            nearestGrouping.splice(nearestGrouping.indexOf(nearest), 1)
+            grouping.push(nearest)
+            #alert(grouping.length)#JSON.stringify(initialGroupings.map((a) -> a.length)))
+    return initialGroupings
+    
+    # The refined means are the centroid of this grouping
+    means = update_means(k, initialGroupings)
+    
+    #alert("indexes" + JSON.stringify())
+    alert(JSON.stringify(initialGroupings.map((a) -> a.length)))
+    
+    ###
     # We just choose arbitrary means here, but it would be better to chose them agglomeratively
     l = floor(points.length / k)
     
@@ -33,7 +129,12 @@ find_initial_means = (k, points, metric) ->
             position += l
         
     return means
-
+    ###
+    
+    #alert(JSON.stringify(means))
+    
+    return means
+    
 # Update means
 update_means = (k, groupings) ->
     means = []
@@ -60,7 +161,7 @@ find_groupings = (k, points, means, metric) ->
         
         # Add this point to the array for that point
         groupings[closest_mean_index].push(p)
-
+    
     return groupings
 
 
@@ -101,9 +202,12 @@ closest = (points, point, metric) ->
     for i in [0...points.length]
         p = points[i]
         d = metric(p, point)
+        #alert("" + i + " -> " + d + ": " + JSON.stringify(p) + ", " + JSON.stringify(point))
         if smallest_distance < 0 || d < smallest_distance
             smallest_distance = d
             minimum = i
+    
+    #alert(minimum)
     
     return minimum
 

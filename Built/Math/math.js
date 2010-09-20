@@ -1,4 +1,4 @@
-var abs, atan2, cos, euclideanMetric, exp, floor, fmod, log, matrixMultiply, maximum, minimum, pi, pow, round, scale, sin, sqrt, sum, tan;
+var abs, angle_in_interval, atan2, cos, euclideanMetric, exp, ffmod, floor, fmod, log, matrixMultiply, maximum, minimum, pi, pow, round, scale, sin, sqrt, sum, tan;
 /* CONSTANTS and FUNCTIONS */
 pow = Math.pow;
 exp = Math.exp;
@@ -15,6 +15,27 @@ pi = Math.PI;
 fmod = function(x, n) {
   return x % n;
 };
+ffmod = function(x, n) {
+  var _a, i;
+  _a = [];
+  for (i = 0; i < 150; i++) {
+    if (x < 0) {
+      x += n;
+    } else if (x > n) {
+      x -= n;
+    } else {
+      return x;
+    }
+  }
+  return _a;
+};
+angle_in_interval = function(c, a, b) {
+  if (a <= b) {
+    return (a <= c) && (c <= b);
+  } else {
+    return ((a <= c) && (c <= 360)) || ((0 <= c) && (c <= b));
+  }
+};
 sum = function(a) {
   var _a, _b, _c, s, x;
   s = 0;
@@ -29,12 +50,14 @@ scale = function(a, b, k) {
   return (1 - k) * a + k * b;
 };
 euclideanMetric = function(a, b) {
-  var x1, x2, y1, y2;
+  var x, x1, x2, y, y1, y2;
   x1 = a.values["likeness"];
-  x2 = b.values["importance"];
-  y1 = a.values["likeness"];
+  x2 = b.values["likeness"];
+  y1 = a.values["importance"];
   y2 = b.values["importance"];
-  return sqrt(x1 * x2 + y1 * y2);
+  x = x1 - x2;
+  y = y1 - y2;
+  return sqrt(x * x - y * y);
 };
 maximum = function(xs) {
   var _a, _b, _c, maxV, x;

@@ -15,7 +15,7 @@ textmate =
     "identifier.variable.parameter": "variable.parameter"
     
     "keyword.control": "keyword"
-    "keyword.modifier": "storage"
+    "keyword.storage": "storage"
     
     "metadata.comment": "comment"
     "metadata.processing.directive": "keyword.control.import"
@@ -44,7 +44,7 @@ vim =
     "identifier.variable.constant": "Constant"
     
     "keyword.control": "Statement"
-    "keyword.modifier": "StorageClass"
+    "keyword.storage": "StorageClass"
     
     "metadata.comment": "Comment"
     "metadata.processing.directive": "PreProc"
